@@ -1,37 +1,36 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const Matchs = new mongoose.Schema({
-    finished:{
-        type:Boolean
+const Matchs = new mongoose.Schema(
+  {
+    finished: {
+      type: Boolean,
     },
-    started:{
-        type:Boolean
+    started: {
+      type: Boolean,
     },
-    kickoff_time :{
-        type:String,
-    
+    kickoff_time: {
+      type: String,
     },
     name_and_result: {
-        type:Map,
-        
+      type: Map,
     },
 
-    gameweek : {type:Number},
-
-    expectations:{
-        type:Object,
-        default:[],
-        require:[true, 'Please provide name']
-
+    gameweek: {
+      type: Number,
     },
-    subscribers:{
-        type:Array,
-        default:[]
 
-    }
+    expectations: {
+      type: Object,
+      default: [],
+    },
+    subscribers: {
+      type: Array,
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-},{
-    timestamps: true
-})
-
-module.exports = mongoose.model('Matchs',Matchs);
+module.exports = mongoose.model("Matchs", Matchs);

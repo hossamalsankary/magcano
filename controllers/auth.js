@@ -1,80 +1,87 @@
-//login
+//Import Libraries
 const jwd = require("jsonwebtoken");
-const userSchema = require("../models/User");
-const { StatusCodes } = require("http-status-codes");
-
-// bcryptjs
 const bcrypt = require("bcryptjs");
 
-// register
-const register = async (req, res) => {
-  console.log(req.body);
-  try {
-    const user = await userSchema.create({ ...req.body });
-    let token = user.createJWT();
+//Import Custom Librares
+const userSchema = require("../models/User");
+const { StatusCodes } = require("http-status-codes");
+const { SucceedRegister, SucceedAccess } = require("./succeed/succeed_res");
 
-    res.status(StatusCodes.CREATED).send({ user: { name: user.name }, token });
-    
-  } catch (error) {
-    res
-      .status(StatusCodes.CREATED)
-      .json({
-        errors: {
-          type: "ValidatorError",
-          massage: "Sorry Something Went Wrong",
-        },
-      });
-  }
-};
-const login = async (req, res) => {
-  const { email, password } = req.body;
+const handelErro = (massage) => ({
+  errors: {
+    type: "ValidatorError",
+    massage: massage,
+  },
+});
+//define User Controller
+const userController = {
+  //Carete A user
+  register: async (req, res) => {
+    try {
+      //Create new user with a uniq email
+      const user = await userSchema.create({ ...req.body });
 
-  if (!email | !password) {
-    return res
-      .status(StatusCodes.CREATED)
-      .json({
-        errors: {
-          type: "ValidatorError",
-          massage: "Sorry Something Went Wrong",
-        },
-      });
-  }
-  // let user = await userSchema.findOne({ email });
-  // var istrue = await user.compare(password);
-  // console.log("ismatch", istrue);
-  try {
-    let user = await userSchema.findOne({ email });
-    var istrue = await user.compare(password);
-
-    console.log("ismatch", istrue);
-    if (istrue) {
+      //create jwt
       let token = user.createJWT();
 
-      res.status(StatusCodes.CREATED).json({
-        login: {
-          status: "succeed",
-        },
+      //   Send Back The Respond
+      let created = new SucceedRegister({
+        massage: "Create new User",
         token: token,
+        data: user,
       });
-    } else {
+
+      res.status(StatusCodes.CREATED).json(created.succeedCrateUser);
+    } catch (error) {
       res.status(StatusCodes.CREATED).json({
-        login: {
-          status: "Login failed",
+        errors: {
+          type: "ValidatorError",
+          massage: error,
         },
       });
     }
-  } catch (error) {
-    res
-      .status(StatusCodes.CREATED)
-      .json({
-        errors: {
-          type: "ValidatorError",
-          massage: "Sorry Something Went Wrong",
-        },
-      });
-  }
+  },
+
+  login: async (req, res) => {
+    //Catch Email And Password
+    const { email, password } = req.body;
+
+    if (!email | !password) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json(handelErro("Opps We Missing Some Data"));
+    }
+
+    try {
+      //Looking For a User
+      let user = await userSchema.findOne({ email });
+      var istrue = await user.compare(password);
+
+      if (istrue) {
+        //Create New Token
+        let token = user.createJWT();
+        const login = new SucceedRegister({
+          massage: "Login succeeded",
+          data: user,
+          token: token,
+        });
+        res.status(StatusCodes.CREATED).json(login.succeedLogin);
+      } else {
+        res.status(StatusCodes.CREATED).json({
+          login: {
+            status: "Login failed",
+          },
+        });
+      }
+    } catch (error) {
+      res
+        .status(StatusCodes.CREATED)
+        .json(handelErro("Login unsucceeded"));
+    }
+  },
 };
+
 module.exports = {
-  login,
-  register,
+  login: userController.login,
+  register: userController.register,
 };

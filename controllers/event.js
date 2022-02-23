@@ -3,7 +3,6 @@ const config = require("../configure/config");
 const jwt = require("jsonwebtoken");
 
 //Import Custom Modules
-const GameWeek = require("../models/gameweek");
 const Matchs = require("../models/matchs");
 const User = require("../models/User");
 const Expect = require("../models/expect");
@@ -12,7 +11,10 @@ const { json } = require("express");
 const event = async (req, res) => {
   try {
     // Cheak The Token Valid
-    var token = req.headers["x-access-token"];
+    var token = req.headers["authorization"];
+
+    token = String(token).slice(7);
+
     var decoded = jwt.verify(token, config.JWT_SECRET);
 
     const { userId, name } = decoded;
@@ -24,51 +26,8 @@ const event = async (req, res) => {
     );
     const { gameweek } = currentmatch;
 
-    let cuurrentgameweek = await Matchs.find({ gameweek: gameweek }).limit(2);
-
-    //Featch The Data to show the Expections
-    let unsubgames = [],
-    subgame = [];
-    cuurrentgameweek.map(async (game) => {
-      // select the subscribers
-      const { subscribers } = game;
-      let subscribersId = new Array();
-
-      if (subscribers.length > 0) {
-        subscribers.map((sub) => {
-          subscribersId.push(sub.userid);
-        })
-        
-        if (subscribersId.includes(userId)) {
-          // Get MuchID
-          let id = game._id;
-          //Get the Exbections
-          let expections = await Expect.findOne(
-            { matchid: id  , userid:userId},
-            { userid: 0, _id: 0, matchid: 0, _v: 0 }
-          );
-          
-          game.started = expections;
-          subgame.push(game);
-           console.log(subgame)
-          // console.log(game)
-
-
-        }
-        //cheack If User One Of These Subscrubers
-        
-        
-      }else{
-        unsubgames.push(game);
-      }
-    });
-   
-   console.log(subgame);
-   
-if(subgame.length != 0){
-    res.json(subgame);
-
-}
+    let cuurrentgameweek = await Matchs.find({ gameweek: gameweek });
+    res.json(cuurrentgameweek);
   } catch (err) {
     res.send(err);
   }
@@ -79,7 +38,8 @@ const addexpectations = async (req, res) => {
   const { matchid, tame_a, tame_b } = req.body;
 
   //Look For Valid Token
-  var token = req.headers["x-access-token"];
+  var token = req.headers["authorization"];
+  token = String(token).slice(7);
 
   try {
     // deCode the Token With  The secret
@@ -96,7 +56,7 @@ const addexpectations = async (req, res) => {
       tame_b: tame_b,
     };
 
-    Expect.create(insertExpections)
+    Expect.insertMany(insertExpections)
       .then(async (expect) => {
         console.log(expect);
         // After Done Inserted Make A relations To user
@@ -118,7 +78,7 @@ const addexpectations = async (req, res) => {
             $push: {
               subscribers: {
                 name: name,
-                userid: expect.userid,
+                userid: userId,
                 time: new Date().toTimeString(),
               },
             },
@@ -152,7 +112,6 @@ const streamevent = async (req, res) => {
 };
 
 const gameweeks = async (req, res) => {
-  let data = await GameWeek.find({});
   let result = new Array();
   data.forEach(async (gameitems) => {
     let id = gameitems.id;

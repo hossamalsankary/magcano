@@ -104,7 +104,7 @@ const updataAsyncData = async () => {
               if (err) {
                 console.log(`Error: ` + err);
               } else {
-                console.log(doc)
+               // console.log(doc)
               }
             }
           );
