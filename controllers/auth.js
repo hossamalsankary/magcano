@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 //Import Custom Librares
 const userSchema = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
-const { SucceedRegister, SucceedAccess } = require("./succeed/succeed_res");
+const { SucceedRegister, SucceedAccess ,HandelRspondes} = require("./succeed/succeed_res");
 
 const handelErro = (massage) => ({
   errors: {
@@ -33,12 +33,8 @@ const userController = {
 
       res.status(StatusCodes.CREATED).json(created.succeedCrateUser);
     } catch (error) {
-      res.status(StatusCodes.CREATED).json({
-        errors: {
-          type: "ValidatorError",
-          massage: error,
-        },
-      });
+      let status = new HandelRspondes({massage:"Sorry SomeThing Went wrong"});
+      res.status(StatusCodes.FAILED_DEPENDENCY).json(status.unsuccedCreateExpections);
     }
   },
 
@@ -67,16 +63,12 @@ const userController = {
         });
         res.status(StatusCodes.CREATED).json(login.succeedLogin);
       } else {
-        res.status(StatusCodes.CREATED).json({
-          login: {
-            status: "Login failed",
-          },
-        });
+        let status = new HandelRspondes({massage:"Login Unsucceed"});
+      res.status(StatusCodes.FORBIDDEN).json(status.unsuccedCreateExpections);
       }
     } catch (error) {
-      res
-        .status(StatusCodes.CREATED)
-        .json(handelErro("Login unsucceeded"));
+      let status = new HandelRspondes({massage:"Sorry Something Went wrong"});
+      res.status(StatusCodes.FAILED_DEPENDENCY).json(status.unsuccedCreateExpections);
     }
   },
 };

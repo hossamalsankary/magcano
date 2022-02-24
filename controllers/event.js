@@ -7,11 +7,13 @@ const Matchs = require("../models/matchs");
 const User = require("../models/User");
 const Expect = require("../models/expect");
 const { json } = require("express");
+const {HandelRspondes} = require("./succeed/succeed_res");
+
 
 const event = async (req, res) => {
   try {
     // Cheak The Token Valid
-    var token = req.headers["authorization"];
+    var token = req.headers.authorization;
 
     token = String(token).slice(7);
 
@@ -27,6 +29,7 @@ const event = async (req, res) => {
     const { gameweek } = currentmatch;
 
     let cuurrentgameweek = await Matchs.find({ gameweek: gameweek });
+
     res.json(cuurrentgameweek);
   } catch (err) {
     res.send(err);
@@ -38,7 +41,7 @@ const addexpectations = async (req, res) => {
   const { matchid, tame_a, tame_b } = req.body;
 
   //Look For Valid Token
-  var token = req.headers["authorization"];
+  var token = req.headers.authorization;
   token = String(token).slice(7);
 
   try {
@@ -55,43 +58,58 @@ const addexpectations = async (req, res) => {
       tame_a: tame_a,
       tame_b: tame_b,
     };
+    // Check If The User Add This Expect Before
+    let isUniq = await Expect.find({
+      $and: [{ userid:userId  }, { matchid: matchid }],
+    });
+     isUniq = isUniq.length == 0?true:false;
+     if(isUniq){
+       Expect.create(insertExpections)
+         .then(async (expect) => {
+           console.log(expect);
+           // After Done Inserted Make A relations To user
+           let userData = await User.findOneAndUpdate(
+             { _id: userId },
+             {
+               $push: {
+                 expectations: {
+                   expectid: expect._id,
+                 },
+               },
+             }
+           );
+   
+           //Make a relations between user and the Match
+           let matchData = await Matchs.findOneAndUpdate(
+             { _id: matchid },
+             {
+               $push: {
+                 subscribers: {
+                   name: name,
+                   userid: userId,
+                   time: new Date().toTimeString(),
+                 },
+               },
+             }
+           );
+         })
+         .catch((err) => {
+           console.log(err);
+         });
+         let status = new HandelRspondes({massage:"Succeded Creater New Expetions"});
+         res.json(status.succedCreateExpections);
+     }else{
+       // There We Going To Updata The Expections
 
-    Expect.insertMany(insertExpections)
-      .then(async (expect) => {
-        console.log(expect);
-        // After Done Inserted Make A relations To user
-        let userData = await User.findOneAndUpdate(
-          { _id: userId },
-          {
-            $push: {
-              expectations: {
-                expectid: expect._id,
-              },
-            },
-          }
-        );
+      let status = new HandelRspondes({massage:"UnSucceded Creater New Expetions"});
+      res.json(status.unsuccedCreateExpections);
 
-        //Make a relations between user and the Match
-        let matchData = await Matchs.findOneAndUpdate(
-          { _id: matchid },
-          {
-            $push: {
-              subscribers: {
-                name: name,
-                userid: userId,
-                time: new Date().toTimeString(),
-              },
-            },
-          }
-        );
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+     }
 
-    res.json({ status: "done" });
   } catch (err) {
-    res.send(err);
+    let status = new HandelRspondes({massage:"Opps Some Thing Went Wrong"});
+    res.json(status.unsuccedCreateExpections);
+
   }
 };
 const streamevent = async (req, res) => {
@@ -112,7 +130,7 @@ const streamevent = async (req, res) => {
 };
 
 const gameweeks = async (req, res) => {
-  let result = new Array();
+  let result = [];
   data.forEach(async (gameitems) => {
     let id = gameitems.id;
     let event = await Matchs.find({ gameweek: id });

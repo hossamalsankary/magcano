@@ -9,7 +9,6 @@ Expections = new mongoose.Schema({
   matchid: {
     type: String,
     require:true,
-    unique: true,
 
   },
 
@@ -20,4 +19,5 @@ Expections = new mongoose.Schema({
     type: Number,
   },
 });
+
 module.exports = mongoose.model("Expections", Expections);

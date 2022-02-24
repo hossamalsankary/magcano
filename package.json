@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
+  "engines": {
+    "node": "8"
+  },
   "scripts": {
     "start": "nodemon app.js"
   },
@@ -34,4 +37,5 @@
     "nodemon": "^2.0.9",
     "prettier": "2.5.1"
   }
+
 }
