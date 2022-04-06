@@ -32,9 +32,9 @@ app.use(errorHandlerMiddleware);
  
 const start = async () => {
   try {
-    // await connect("mongodb+srv://karzma:.01068944209.@cluster0.iimjq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
-    await connectDB(config.getDBString());
-    //updataAsyncData();
+    await connectDB("mongodb+srv://karzma:.01068944209.@cluster0.iimjq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+    //await connectDB(config.getDBString());
+    updataAsyncData();
     app.listen(config.PORT, () =>
       console.log(config.getSereverUrl(), "API Listen", config.getMagicanoUrl())
     );
