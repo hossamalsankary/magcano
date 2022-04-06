@@ -11,16 +11,6 @@ const { HandelRspondes } = require("./succeed/succeed_res");
 
 const event = async (req, res) => {
   try {
-    // Cheak The Token Valid
-    // var token = req.headers.authorization;
-
-    // token = String(token).slice(7);
-
-    // var decoded = jwt.verify(token, config.JWT_SECRET);
-
-    // const { userId, name } = decoded;
-
-    //select curennt gameweek
     let currentmatch = await Matchs.findOne(
       { finished: false },
       { gameweek: 1, _id: 0 }
@@ -101,6 +91,7 @@ const addexpectations = async (req, res) => {
     let insertExpections = {
       userid: userId,
       matchid: matchid,
+      finished: false,
       tame_a: tame_a,
       tame_b: tame_b,
     };
@@ -137,6 +128,11 @@ const addexpectations = async (req, res) => {
                 },
               },
             }
+          );
+          console.log(matchData);
+          await Expect.findOneAndUpdate(
+            { matchid: matchData._id },
+            { finished: matchData.finished }
           );
         })
         .catch((err) => {

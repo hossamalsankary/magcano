@@ -11,6 +11,10 @@ Expections = new mongoose.Schema({
     require:true,
 
   },
+  finished:{
+    type:Boolean,
+    default:false,
+  },
 
   tame_a: {
     type: Number,

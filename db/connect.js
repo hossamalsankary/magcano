@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const connectDB = (url) => {
   return mongoose.connect(url, {
@@ -7,12 +7,12 @@ const connectDB = (url) => {
     useFindAndModify: false,
     useUnifiedTopology: true,
   }).then(()=>{
-    console.log("connectd")
-  })
-}
+    console.log("connectd");
+  });
+};
 const endconections = ()=>{
- return mongoose.disconnect()
-}
+ return mongoose.disconnect();
+};
 
 
-module.exports = {connectDB , endconections}
+module.exports = {connectDB , endconections};
