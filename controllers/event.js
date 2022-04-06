@@ -7,10 +7,35 @@ const Matchs = require("../models/matchs");
 const User = require("../models/User");
 const Expect = require("../models/expect");
 const { json } = require("express");
-const {HandelRspondes} = require("./succeed/succeed_res");
-
+const { HandelRspondes } = require("./succeed/succeed_res");
 
 const event = async (req, res) => {
+  try {
+    // Cheak The Token Valid
+    // var token = req.headers.authorization;
+
+    // token = String(token).slice(7);
+
+    // var decoded = jwt.verify(token, config.JWT_SECRET);
+
+    // const { userId, name } = decoded;
+
+    //select curennt gameweek
+    let currentmatch = await Matchs.findOne(
+      { finished: false },
+      { gameweek: 1, _id: 0 }
+    );
+    const { gameweek } = currentmatch;
+
+    let cuurrentgameweek = await Matchs.find({ gameweek: gameweek });
+
+    res.json(cuurrentgameweek);
+  } catch (err) {
+    res.send(err);
+  }
+};
+
+const userExpections = async (req, res) => {
   try {
     // Cheak The Token Valid
     var token = req.headers.authorization;
@@ -21,16 +46,37 @@ const event = async (req, res) => {
 
     const { userId, name } = decoded;
 
-    //select curennt game week
-    let currentmatch = await Matchs.findOne(
-      { finished: false },
-      { gameweek: 1, _id: 0 }
-    );
-    const { gameweek } = currentmatch;
+    Expect.find({ userid: userId }).then((userEx) => {
+      let exPectionsMatch = userEx.map((exp) => {
+        let matchid = exp.matchid;
 
-    let cuurrentgameweek = await Matchs.find({ gameweek: gameweek });
+        return new Promise((resolve, reject) => {
+          try {
+            Matchs.find({ _id: matchid }, { subscribers: 0 }).then((match) => {
+              resolve(match);
+            });
+          } catch (error) {
+            reject(error);
+          }
+        });
+      });
 
-    res.json(cuurrentgameweek);
+      Promise.all(exPectionsMatch).then((data) => {
+        let userMatchesdata = data;
+        let result = [];
+
+        // userMatchesdata.push(userEx);
+        // console.log(userMatchesdata);
+        let handeldata = [];
+
+        for (let index = 0; index < userMatchesdata.length; index++) {
+          let machitem = userMatchesdata[index][0];
+          machitem.expectations.push(userEx[index]);
+          handeldata.push(machitem);
+        }
+        res.json(handeldata);
+      });
+    });
   } catch (err) {
     res.send(err);
   }
@@ -60,56 +106,57 @@ const addexpectations = async (req, res) => {
     };
     // Check If The User Add This Expect Before
     let isUniq = await Expect.find({
-      $and: [{ userid:userId  }, { matchid: matchid }],
+      $and: [{ userid: userId }, { matchid: matchid }],
     });
-     isUniq = isUniq.length == 0?true:false;
-     if(isUniq){
-       Expect.create(insertExpections)
-         .then(async (expect) => {
-           console.log(expect);
-           // After Done Inserted Make A relations To user
-           let userData = await User.findOneAndUpdate(
-             { _id: userId },
-             {
-               $push: {
-                 expectations: {
-                   expectid: expect._id,
-                 },
-               },
-             }
-           );
-   
-           //Make a relations between user and the Match
-           let matchData = await Matchs.findOneAndUpdate(
-             { _id: matchid },
-             {
-               $push: {
-                 subscribers: {
-                   name: name,
-                   userid: userId,
-                   time: new Date().toTimeString(),
-                 },
-               },
-             }
-           );
-         })
-         .catch((err) => {
-           console.log(err);
-         });
-         let status = new HandelRspondes({massage:"Succeded Creater New Expetions"});
-         res.json(status.succedCreateExpections);
-     }else{
-       // There We Going To Updata The Expections
+    isUniq = isUniq.length == 0 ? true : false;
+    if (isUniq) {
+      Expect.create(insertExpections)
+        .then(async (expect) => {
+          console.log(expect);
+          // After Done Inserted Make A relations To user
+          let userData = await User.findOneAndUpdate(
+            { _id: userId },
+            {
+              $push: {
+                expectations: {
+                  expectid: expect._id,
+                },
+              },
+            }
+          );
 
-      let status = new HandelRspondes({massage:"UnSucceded Creater New Expetions"});
+          //Make a relations between user and the Match
+          let matchData = await Matchs.findOneAndUpdate(
+            { _id: matchid },
+            {
+              $push: {
+                subscribers: {
+                  name: name,
+                  userid: userId,
+                  time: new Date().toTimeString(),
+                },
+              },
+            }
+          );
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      let status = new HandelRspondes({
+        massage: "Succeded Creater New Expetions",
+      });
+      res.json(status.succedCreateExpections);
+    } else {
+      // There We Going To Updata The Expections
+
+      let status = new HandelRspondes({
+        massage: "UnSucceded Creater New Expetions",
+      });
       res.json(status.unsuccedCreateExpections);
-
-     }
-
+    }
   } catch (err) {
-    let status = new HandelRspondes({massage:"Opps Some Thing Went Wrong"});
+    let status = new HandelRspondes({ massage: "Opps Some Thing Went Wrong" });
     res.json(status.unsuccedCreateExpections);
-
   }
 };
 const streamevent = async (req, res) => {
@@ -154,4 +201,5 @@ module.exports = {
   event,
   gameweeks,
   addexpectations,
+  userExpections,
 };
