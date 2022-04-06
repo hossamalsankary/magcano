@@ -19,9 +19,8 @@ const updataAsyncData = require("./serves/updataeverything"),
 //Careate New Express applications and Configure It
 app.use(express.json());
 
-
-app.get("/",(res , req)=>{
-  res.json({data:"data"})
+app.get('/', function (req, res) {
+  res.send('Hello World')
 })
 //Configure Routes
 app.use("/api/v1/magicano", event);
