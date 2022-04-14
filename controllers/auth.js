@@ -5,7 +5,17 @@ const bcrypt = require("bcryptjs");
 //Import Custom Librares
 const userSchema = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
-const { SucceedRegister, SucceedAccess ,HandelRspondes} = require("./succeed/succeed_res");
+const {
+  SucceedRegister,
+  SucceedAccess,
+  HandelRspondes,
+} = require("./succeed/succeed_res");
+const {
+  CustomAPIError,
+  UnauthenticatedError,
+  NotFoundError,
+  BadRequestError,
+} = require("../errors/index");
 
 const handelErro = (massage) => ({
   errors: {
@@ -16,7 +26,7 @@ const handelErro = (massage) => ({
 //define User Controller
 const userController = {
   //Carete A user
-  register: async (req, res) => {
+  register: async (req, res, next) => {
     try {
       //Create new user with a uniq email
       const user = await userSchema.create({ ...req.body });
@@ -30,11 +40,15 @@ const userController = {
         token: token,
         data: user,
       });
-
+1111111111111111111111111111111
       res.status(StatusCodes.CREATED).json(created.succeedCrateUser);
     } catch (error) {
-      let status = new HandelRspondes({massage:"Sorry SomeThing Went wrong"});
-      res.status(StatusCodes.FAILED_DEPENDENCY).json(status.unsuccedCreateExpections);
+      let status = new HandelRspondes({
+        massage: "Sorry SomeThing Went wrong",
+      });
+      res
+        .status(StatusCodes.FAILED_DEPENDENCY)
+        .json(status.unsuccedCreateExpections);
     }
   },
 
@@ -63,12 +77,16 @@ const userController = {
         });
         res.status(StatusCodes.CREATED).json(login.succeedLogin);
       } else {
-        let status = new HandelRspondes({massage:"Login Unsucceed"});
-      res.status(StatusCodes.FORBIDDEN).json(status.unsuccedCreateExpections);
+        let status = new HandelRspondes({ massage: "Login Unsucceed" });
+        res.status(StatusCodes.FORBIDDEN).json(status.unsuccedCreateExpections);
       }
     } catch (error) {
-      let status = new HandelRspondes({massage:"Sorry Something Went wrong"});
-      res.status(StatusCodes.FAILED_DEPENDENCY).json(status.unsuccedCreateExpections);
+      let status = new HandelRspondes({
+        massage: "Sorry Something Went wrong",
+      });
+      res
+        .status(StatusCodes.FAILED_DEPENDENCY)
+        .json(status.unsuccedCreateExpections);
     }
   },
 };
