@@ -45,7 +45,7 @@ const handelDB = {
   insertMatch: async (matchdata) => {
     console.time("time");
     try {
-      connectDB(config.process.env.DATABASE_URL);
+      connectDB(config.getDBString());
       handelDB.resetDataBase();
 
       MatchScahme.create(matchdata).then((docs) => {

@@ -35,36 +35,30 @@ const userController = {
       let token = user.createJWT();
 
       //   Send Back The Respond
-      let created = new SucceedRegister({
+     let created = new SucceedRegister({
         massage: "Create new User",
         token: token,
         data: user,
       });
-1111111111111111111111111111111
       res.status(StatusCodes.CREATED).json(created.succeedCrateUser);
     } catch (error) {
-      let status = new HandelRspondes({
-        massage: "Sorry SomeThing Went wrong",
-      });
-      res
-        .status(StatusCodes.FAILED_DEPENDENCY)
-        .json(status.unsuccedCreateExpections);
+        next(error);
     }
   },
 
-  login: async (req, res) => {
+  login: async (req, res , next) => {
     //Catch Email And Password
     const { email, password } = req.body;
 
     if (!email | !password) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json(handelErro("Opps We Missing Some Data"));
+      throw new BadRequestError("Opps We Missing Some Data");
     }
 
     try {
       //Looking For a User
       let user = await userSchema.findOne({ email });
+      if(!user)        throw new UnauthenticatedError("User Not Found");
+
       var istrue = await user.compare(password);
 
       if (istrue) {
@@ -77,16 +71,10 @@ const userController = {
         });
         res.status(StatusCodes.CREATED).json(login.succeedLogin);
       } else {
-        let status = new HandelRspondes({ massage: "Login Unsucceed" });
-        res.status(StatusCodes.FORBIDDEN).json(status.unsuccedCreateExpections);
+        throw new UnauthenticatedError("Some Thing Went Wrong");
       }
     } catch (error) {
-      let status = new HandelRspondes({
-        massage: "Sorry Something Went wrong",
-      });
-      res
-        .status(StatusCodes.FAILED_DEPENDENCY)
-        .json(status.unsuccedCreateExpections);
+      next(error);
     }
   },
 };
