@@ -34,7 +34,7 @@ const updataUserPoints = async (userID) => {
 
 const start = async () => {
   try {
-    await connectDB(config.getDBString());
+    await connectDB(process.env.DATABASE_URL);
     updataUserPoints("624d7aa0a042b028e81384fb");
   } catch (error) {}
 };
