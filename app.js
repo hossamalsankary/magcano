@@ -19,7 +19,9 @@ const updataAsyncData = require("./serves/updataeverything"),
 //Careate New Express applications and Configure It
 app.use(express.json());
 
-
+app.get('/', function (req, res) {
+  res.send('Hello World');
+});
 //Configure Routes
 app.use("/api/v1/magicano", event);
 app.use("/api/v1/auth", auth);
@@ -29,12 +31,12 @@ app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
  app.use(bodyParser.json());
  app.use(bodyParser.urlencoded({ extended: true }));
- 
+
 const start = async () => {
   try {
-    // await connect("mongodb+srv://karzma:.01068944209.@cluster0.iimjq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
-    await connectDB(config.getDBString());
-    //updataAsyncData();
+    await connectDB(process.env.DATABASE_URL);
+   // await connectDB(config.getDBString());
+    updataAsyncData();
     app.listen(config.PORT, () =>
       console.log(config.getSereverUrl(), "API Listen", config.getMagicanoUrl())
     );
