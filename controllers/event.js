@@ -191,15 +191,12 @@ const streamevent = async (req, res, next) => {
 };
 
 const resetdata = async (req, res) => {
-try {
+
   await Expect.deleteMany({});
   await User.deleteMany({});
     StratBulid();
   res.status(StatusCodes.ACCEPTED).json({mssage:"You God To GO"});
 
-} catch (error) {
-  res.status(StatusCodes.BAD_GATEWAY).json({mssage:error});
-}
 
 };
 

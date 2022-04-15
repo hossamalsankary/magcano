@@ -72,7 +72,9 @@ requestOb.getGameWeeksID().then(async (eventReqData) => {
 
   let matchRequestData = await Promise.all(
     requestOb.getMatchsRequest(eventIDList)
-  );
+  ).catch((erorrs)=>{
+    onsole.log(erorrs);
+  });
 
   matchRequestData.forEach(async (matchevent) => {
     matchevent.forEach((match) => {
