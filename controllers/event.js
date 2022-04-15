@@ -191,23 +191,16 @@ const streamevent = async (req, res, next) => {
 };
 
 const resetdata = async (req, res) => {
- try {
+try {
+  await Expect.deleteMany({});
+  await User.deleteMany({});
+    StratBulid();
+  res.status(StatusCodes.ACCEPTED).json({mssage:"You God To GO"});
 
-   Matchs.remove({}).then((val)=>{
-    
-     User.remove({}).then((val)=>{
-      
-        Expect.remove({}).then((val)=>{
-          StratBulid();
-          res.status(200).json({massage:"Updata All Data"});
-       });
-    });
-  });
+} catch (error) {
+  res.status(StatusCodes.BAD_GATEWAY).json({mssage:error});
+}
 
- } catch (error) {
-   console.log(error);
-   next(error);
- }
 };
 
 module.exports = {
