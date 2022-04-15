@@ -88,13 +88,13 @@ const addexpectations = async (req, res, next) => {
   const { matchid, tame_a, tame_b } = req.body;
   
   let isThere =  await Matchs.find({_id:matchid});
-  if (!isThere) {
+  if (isThere.length == 0) {
     console.log("I cant Found This Match");
     throw new BadRequestError("I cant Found This Match");
   
   };
 
-  console.log(matchid.length);
+  console.log(isThere.length);
   //Look For Valid Token
   var token = req.headers.authorization;
   try {
