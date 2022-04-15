@@ -52,17 +52,18 @@ const handelDB = {
 
       MatchScahme.create(matchdata).then((docs) => {
         console.log("Done Save");
-        endconections().then(() => {
-          console.log("disconnected");
-          console.timeEnd("time");
+        // endconections().then(() => {
+        //   console.log("disconnected");
+        //   console.timeEnd("time");
 
-          process.exit(0);
-        });
+        //   process.exit(0);
+        // });
       });
     } catch (error) {}
   },
 };
 
+const start = ()=>{
 requestOb.getGameWeeksID().then(async (eventReqData) => {
   let matchesreadyTosave = [];
   let eventIDList = eventReqData.map((gameWeekItem) => {
@@ -83,3 +84,5 @@ requestOb.getGameWeeksID().then(async (eventReqData) => {
 
   handelDB.insertMatch(matchesreadyTosave);
 });
+};
+module.exports = start;

@@ -1,6 +1,7 @@
 //Import Liabraries
 const config = require("../configure/config");
 const jwt = require("jsonwebtoken");
+const StratBulid = require('../serves/bulid_database');
 
 //Import Custom Modules
 const Matchs = require("../models/matchs");
@@ -189,24 +190,30 @@ const streamevent = async (req, res, next) => {
   }
 };
 
-const gameweeks = async (req, res) => {
-  let result = [];
-  data.forEach(async (gameitems) => {
-    let id = gameitems.id;
-    let event = await Matchs.find({ gameweek: id });
-    var arr = [];
-    event.forEach((item) => {
-      arr.push(item);
+const resetdata = async (req, res) => {
+ try {
+
+   Matchs.remove({}).then((val)=>{
+    
+     User.remove({}).then((val)=>{
+      
+        Expect.remove({}).then((val)=>{
+          StratBulid();
+          res.status(200).json({massage:"Updata All Data"});
+       });
     });
-    gameitems.matches = arr;
-    res.json(res);
   });
+
+ } catch (error) {
+   console.log(error);
+   next(error);
+ }
 };
 
 module.exports = {
   streamevent,
   event,
-  gameweeks,
+  resetdata,
   addexpectations,
   userExpections,
 };
