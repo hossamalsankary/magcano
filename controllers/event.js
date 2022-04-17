@@ -1,6 +1,7 @@
 //Import Liabraries
 const config = require("../configure/config");
 const jwt = require("jsonwebtoken");
+const StratBulid = require("../serves/bulid_database");
 
 //Import Custom Modules
 const Matchs = require("../models/matchs");
@@ -32,8 +33,7 @@ const event = async (req, res, next) => {
   }
 };
 
-
-const userExpections = async (req, res , next) => {
+const userExpections = async (req, res, next) => {
   try {
     // Cheak The Token Valid
     var token = req.headers.authorization;
@@ -47,10 +47,14 @@ const userExpections = async (req, res , next) => {
     Expect.find({ userid: userId }).then((userEx) => {
       let exPectionsMatch = userEx.map((exp) => {
         let matchid = exp.matchid;
+        if (!userEx) throw new BadRequestError("Opps Token Not Found");
 
         return new Promise((resolve, reject) => {
           try {
             Matchs.find({ _id: matchid }, { subscribers: 0 }).then((match) => {
+              if (!match) throw new BadRequestError("Opps Token Not Found");
+              console.log(match);
+
               resolve(match);
             });
           } catch (error) {
@@ -62,7 +66,6 @@ const userExpections = async (req, res , next) => {
       Promise.all(exPectionsMatch).then((data) => {
         let userMatchesdata = data;
         let result = [];
-
         // userMatchesdata.push(userEx);
         // console.log(userMatchesdata);
         let handeldata = [];
@@ -82,10 +85,14 @@ const userExpections = async (req, res , next) => {
 const addexpectations = async (req, res, next) => {
   // Get Match Id
   const { matchid, tame_a, tame_b } = req.body;
-  if (matchid.length != 24) {
-    throw new BadRequestError(".");
+
+  let isThere = await Matchs.find({ _id: matchid });
+  if (isThere.length == 0) {
+    console.log("I cant Found This Match");
+    throw new BadRequestError("I cant Found This Match");
   }
-  console.log(matchid.length);
+
+  console.log(isThere.length);
   //Look For Valid Token
   var token = req.headers.authorization;
   try {
@@ -189,24 +196,17 @@ const streamevent = async (req, res, next) => {
   }
 };
 
-const gameweeks = async (req, res) => {
-  let result = [];
-  data.forEach(async (gameitems) => {
-    let id = gameitems.id;
-    let event = await Matchs.find({ gameweek: id });
-    var arr = [];
-    event.forEach((item) => {
-      arr.push(item);
-    });
-    gameitems.matches = arr;
-    res.json(res);
-  });
+const resetdata = async (req, res) => {
+  await Expect.deleteMany({});
+  await User.deleteMany({});
+  StratBulid();
+  res.status(StatusCodes.ACCEPTED).json({ mssage: "You God To GO" });
 };
 
 module.exports = {
   streamevent,
   event,
-  gameweeks,
+  resetdata,
   addexpectations,
   userExpections,
 };

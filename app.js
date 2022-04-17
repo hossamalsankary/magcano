@@ -20,8 +20,8 @@ const updataAsyncData = require("./serves/updataeverything"),
 app.use(express.json());
 
 app.get('/', function (req, res) {
-  res.send('Hello World');
-});
+let api = "/api/v1/magicano";
+res.send('<h1>Magcano</h1><a href="/api/v1/magicano">Documentation</a>');});
 //Configure Routes
 app.use("/api/v1/magicano", event);
 app.use("/api/v1/auth", auth);
@@ -34,9 +34,9 @@ app.use(errorHandlerMiddleware);
 
 const start = async () => {
   try {
-    //await connectDB(process.env.DATABASE_URL);
-    await connectDB(config.getDBString());
-    //updataAsyncData();
+    await connectDB(process.env.DATABASE_URL);
+    //await connectDB(config.getDBString());
+  //  updataAsyncData();
     app.listen(config.PORT, () =>
       console.log(config.getSereverUrl(), "API Listen", config.getMagicanoUrl())
     );
