@@ -1,6 +1,7 @@
 //Import Liabraries
 const config = require("../configure/config");
 const jwt = require("jsonwebtoken");
+const StratBulid = require("../serves/bulid_database");
 
 //Import Custom Modules
 const Matchs = require("../models/matchs");
@@ -8,24 +9,31 @@ const User = require("../models/User");
 const Expect = require("../models/expect");
 const { json } = require("express");
 const { HandelRspondes } = require("./succeed/succeed_res");
+const {
+  CustomAPIError,
+  UnauthenticatedError,
+  NotFoundError,
+  BadRequestError,
+} = require("../errors/index");
+const { StatusCodes } = require("http-status-codes");
 
-const event = async (req, res) => {
+const event = async (req, res, next) => {
   try {
     let currentmatch = await Matchs.findOne(
       { finished: false },
       { gameweek: 1, _id: 0 }
     );
     const { gameweek } = currentmatch;
-
+    if (!currentmatch) throw new BadRequestError("Opps We Missing Some Data");
     let cuurrentgameweek = await Matchs.find({ gameweek: gameweek });
 
     res.json(cuurrentgameweek);
   } catch (err) {
-    res.send(err);
+    next(err);
   }
 };
 
-const userExpections = async (req, res) => {
+const userExpections = async (req, res, next) => {
   try {
     // Cheak The Token Valid
     var token = req.headers.authorization;
@@ -39,10 +47,14 @@ const userExpections = async (req, res) => {
     Expect.find({ userid: userId }).then((userEx) => {
       let exPectionsMatch = userEx.map((exp) => {
         let matchid = exp.matchid;
+        if (!userEx) throw new BadRequestError("Opps Token Not Found");
 
         return new Promise((resolve, reject) => {
           try {
             Matchs.find({ _id: matchid }, { subscribers: 0 }).then((match) => {
+              if (!match) throw new BadRequestError("Opps Token Not Found");
+              console.log(match);
+
               resolve(match);
             });
           } catch (error) {
@@ -54,7 +66,6 @@ const userExpections = async (req, res) => {
       Promise.all(exPectionsMatch).then((data) => {
         let userMatchesdata = data;
         let result = [];
-
         // userMatchesdata.push(userEx);
         // console.log(userMatchesdata);
         let handeldata = [];
@@ -68,19 +79,27 @@ const userExpections = async (req, res) => {
       });
     });
   } catch (err) {
-    res.send(err);
+    res.next(err);
   }
 };
-
-const addexpectations = async (req, res) => {
+const addexpectations = async (req, res, next) => {
   // Get Match Id
   const { matchid, tame_a, tame_b } = req.body;
 
+  let isThere = await Matchs.find({ _id: matchid });
+  if (isThere.length == 0) {
+    console.log("I cant Found This Match");
+    throw new BadRequestError("I cant Found This Match");
+  }
+
+  console.log(isThere.length);
   //Look For Valid Token
   var token = req.headers.authorization;
-  token = String(token).slice(7);
-
   try {
+    if (!token) throw new BadRequestError("Opps Token Not Found");
+
+    token = String(token).slice(7);
+
     // deCode the Token With  The secret
     var decoded = jwt.verify(token, config.JWT_SECRET);
 
@@ -129,6 +148,8 @@ const addexpectations = async (req, res) => {
               },
             }
           );
+          if (!matchData) throw new BadRequestError("we Got Some Problems");
+
           console.log(matchData);
           await Expect.findOneAndUpdate(
             { matchid: matchData._id },
@@ -148,54 +169,44 @@ const addexpectations = async (req, res) => {
       let status = new HandelRspondes({
         massage: "UnSucceded Creater New Expetions",
       });
-      res.json(status.unsuccedCreateExpections);
+      res.status(StatusCodes.BAD_REQUEST).json(status.unsuccedCreateExpections);
     }
   } catch (err) {
-    let status = new HandelRspondes({ massage: "Opps Some Thing Went Wrong" });
-    res.json(status.unsuccedCreateExpections);
+    next(err);
   }
 };
-const streamevent = async (req, res) => {
-  let data = await Matchs.find({
-    $and: [{ starteds: true }, { finished: false }],
-  });
-  if (data.length === 0) {
-    console.log("we have no match playing right now");
-    data = await Matchs.findOne({ finished: false });
-    let now = new Date().valueOf();
-    let matchdata = new Date(data.kickoff_time).valueOf();
-    let dayLeft = (matchdata - now) / 1000 / 60 / 60 / 24;
-
-    console.log(Math.floor(dayLeft));
-  }
-
-  res.json({ data });
-};
-
-const gameweeks = async (req, res) => {
-  let result = [];
-  data.forEach(async (gameitems) => {
-    let id = gameitems.id;
-    let event = await Matchs.find({ gameweek: id });
-    var arr = [];
-    event.forEach((item) => {
-      arr.push(item);
+const streamevent = async (req, res, next) => {
+  try {
+    let data = await Matchs.find({
+      $and: [{ starteds: true }, { finished: false }],
     });
-    gameitems.matches = arr;
-    res.json(res);
-  });
+    if (data.length === 0) {
+      console.log("we have no match playing right now");
+      data = await Matchs.findOne({ finished: false });
+      let now = new Date().valueOf();
+      let matchdata = new Date(data.kickoff_time).valueOf();
+      let dayLeft = (matchdata - now) / 1000 / 60 / 60 / 24;
+
+      console.log(Math.floor(dayLeft));
+    }
+
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
 };
-const updataJob = async (req, res) => {
-  res.send("getallevent");
-};
-const deleteJob = async (req, res) => {
-  res.send("getallevent");
+
+const resetdata = async (req, res) => {
+  await Expect.deleteMany({});
+  await User.deleteMany({});
+  StratBulid();
+  res.status(StatusCodes.ACCEPTED).json({ mssage: "You God To GO" });
 };
 
 module.exports = {
   streamevent,
   event,
-  gameweeks,
+  resetdata,
   addexpectations,
   userExpections,
 };

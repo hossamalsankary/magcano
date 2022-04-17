@@ -1,3 +1,4 @@
+
 //Import Libararies
 const axios = require("axios");
 
@@ -53,18 +54,24 @@ const handelDB = {
   insertMatch: async (matchdata) => {
     console.time("time");
     try {
+<<<<<<< HEAD
       await connectDB("mongodb+srv://karzma:.01068944209.@cluster0.iimjq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
      // connectDB(config.getDBString());
+=======
+       connectDB(process.env.DATABASE_URL);
+      // await connectDB(config.getDBString());
+
+>>>>>>> develop
       handelDB.resetDataBase();
 
       MatchScahme.create(matchdata).then((docs) => {
         console.log("Done Save");
-        endconections().then(() => {
-          console.log("disconnected");
-          console.timeEnd("time");
+        // endconections().then(() => {
+        //   console.log("disconnected");
+        //   console.timeEnd("time");
 
-          process.exit(0);
-        });
+        //   process.exit(0);
+        // });
       });
     } catch (error) {
       console.log(error)
@@ -72,6 +79,7 @@ const handelDB = {
   },
 };
 
+const start = ()=>{
 requestOb.getGameWeeksID().then(async (eventReqData) => {
   let matchesreadyTosave = [];
   let eventIDList = eventReqData.map((gameWeekItem) => {
@@ -80,7 +88,9 @@ requestOb.getGameWeeksID().then(async (eventReqData) => {
 
   let matchRequestData = await Promise.all(
     requestOb.getMatchsRequest(eventIDList)
-  );
+  ).catch((erorrs)=>{
+    onsole.log(erorrs);
+  });
 
   matchRequestData.forEach(async (matchevent) => {
     matchevent.forEach((match) => {
@@ -92,3 +102,5 @@ requestOb.getGameWeeksID().then(async (eventReqData) => {
 
   handelDB.insertMatch(matchesreadyTosave);
 });
+};
+module.exports = start;

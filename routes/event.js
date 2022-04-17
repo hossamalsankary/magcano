@@ -5,7 +5,7 @@ const router =  express.Router();
  const {
     event,
     streamevent,
-    gameweeks,
+    resetdata,
     addexpectations,
     userExpections
 } = require('../controllers/event');
@@ -15,7 +15,7 @@ router.route("/").get(event);
 router.route("/expectations").post(addexpectations);
 router.route("/userExpections").get(userExpections);
 router.route("/next").get(streamevent);
-router.route("/gameweeks").get(gameweeks);
+router.route("/resetdata").delete(resetdata);
 //the main post requist
 
 //export router

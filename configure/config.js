@@ -2,9 +2,10 @@ const config = {
     VERSION:1,
     BULID:1,
     url:"http//127.0.0.1",
-    PORT:process.env.PORT || 8000,
+    PORT:process.env.PORT || 3000,
     API_PATH:"/api/v1/magicano",
-   JWT_SECRET:"process.env.JWT_SECRET",
+   JWT_SECRET:process.env.JWT_SECRET,
+   DATABASE_URL:process.env.DATABASE_URL,
     FAPi_URL:{
         event:"https://fantasy.premierleague.com/api/bootstrap-static/",
         match(gameId){
@@ -25,13 +26,13 @@ const config = {
 
     //Get Server Url String
     getSereverUrl(){
-        return `${this.url}/${this.PORT}`
+        return `${this.url}/${this.PORT}`;
     },
 
     //Get Api Magicano Url String 
     getMagicanoUrl (){
-        return `${this.getDBString()}${this.API_PATH}`
+        return `${this.getDBString()}${this.API_PATH}`;
     }
-}
+};
 
 module.exports = config;

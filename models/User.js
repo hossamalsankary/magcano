@@ -29,6 +29,10 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Please provide password"],
     minlength: 6,
   },
+  optVerifications:{
+  type:Boolean,
+  default:false
+  },
   expectations: {
     type: Array,
   },
