@@ -36,7 +36,7 @@ const start = async () => {
   try {
     await connectDB(process.env.DATABASE_URL);
     //await connectDB(config.getDBString());
-  //  updataAsyncData();
+    updataAsyncData();
     app.listen(config.PORT, () =>
       console.log(config.getSereverUrl(), "API Listen", config.getMagicanoUrl())
     );
