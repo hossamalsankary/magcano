@@ -124,17 +124,85 @@ const userController = {
         }
 
         res
-          .status(StatusCodes.CREATED)
-          .json({ massage: "optVerifications created" });
+          .status(StatusCodes.ACCEPTED)
+          .json({ massage: "verifications succeed" });
       } else {
         throw new BadRequestError("Opps Some Thing went wrong");
       }
     }
   },
+  forgetPassword: async (req, res, next) => {
+    //first lokking for email
+    // send code to user
+    // create a reset password route
+    const { email } = req.body;
+    if (!email) {
+      throw new BadRequestError("Opps Plase Provied Your Email");
+    }
+
+    //find user
+    let user = await User.findOne({ email: email });
+    if (!user || user.length == 0) {
+      throw new BadRequestError("Opps Plase Provied Your Email");
+    }
+
+    //saving and sending a verification code
+    // create OTP code
+    let code = Math.floor(Math.random() * 99999);
+
+    //save opt
+    Verifications.create({
+      userid: user._id,
+      opt: code,
+    }).then((result) => {
+      if (!result) {
+        throw new BadRequestError("Opps Some Thing went wrong");
+      } else {
+        try {
+          opt(code, user.email);
+          res.status(StatusCodes.ACCEPTED).json({
+            massage: "verifications succeed",
+            data: {
+              userid: user.id,
+            },
+          });
+        } catch (error) {
+          next(error);
+        }
+      }
+    });
+  },
+  resetpassword:async(req , res , next)=>{
+   let{userid , newpassword} = req.body;
+  console.log(userid , newpassword)
+   
+   let findUser = await User.find({_id:userid});
+   if (!findUser || findUser.length == 0) {
+    throw new BadRequestError("Opps user not found ");
+  }else{
+    let salt = await bcrypt.genSalt(10);
+    newpassword = await bcrypt.hash(newpassword, salt);
+
+    let updatepassword = await User.findByIdAndUpdate({_id:userid} , {password:newpassword});
+    if (!updatepassword || updatepassword.length == 0) throw new BadRequestError("something went wrong with update password");
+
+    res.status(StatusCodes.ACCEPTED).json({
+      massage: "user password had be update",
+      data: {
+        userid: updatepassword,
+      },
+    });
+
+  }
+  
+
+  }
 };
 
 module.exports = {
   login: userController.login,
   register: userController.register,
   verifications: userController.verifications,
+  forgetPassword:userController.forgetPassword,
+  resetpassword:userController.resetpassword
 };
