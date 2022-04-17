@@ -1,1 +1,0 @@
--This app id back-end for mobile application call magcano
