@@ -25,12 +25,12 @@ const config = {
 
     //Get Server Url String
     getSereverUrl(){
-        return `${this.url}/${this.PORT}`
+        return `${this.url}/${this.PORT}`;
     },
 
     //Get Api Magicano Url String 
     getMagicanoUrl (){
-        return `${this.getDBString()}${this.API_PATH}`
+        return `${this.getDBString()}${this.API_PATH}`;
     }
 };
 
