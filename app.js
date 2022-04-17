@@ -34,9 +34,9 @@ app.use(errorHandlerMiddleware);
 
 const start = async () => {
   try {
-    await connectDB(process.env.DATABASE_URL);
-    //await connectDB(config.getDBString());
-    updataAsyncData();
+    //await connectDB(process.env.DATABASE_URL);
+    await connectDB(config.getDBString());
+  //  updataAsyncData();
     app.listen(config.PORT, () =>
       console.log(config.getSereverUrl(), "API Listen", config.getMagicanoUrl())
     );

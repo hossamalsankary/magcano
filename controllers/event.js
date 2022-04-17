@@ -1,7 +1,7 @@
 //Import Liabraries
 const config = require("../configure/config");
 const jwt = require("jsonwebtoken");
-const StratBulid = require('../serves/bulid_database');
+const StratBulid = require("../serves/bulid_database");
 
 //Import Custom Modules
 const Matchs = require("../models/matchs");
@@ -33,8 +33,7 @@ const event = async (req, res, next) => {
   }
 };
 
-
-const userExpections = async (req, res , next) => {
+const userExpections = async (req, res, next) => {
   try {
     // Cheak The Token Valid
     var token = req.headers.authorization;
@@ -86,13 +85,12 @@ const userExpections = async (req, res , next) => {
 const addexpectations = async (req, res, next) => {
   // Get Match Id
   const { matchid, tame_a, tame_b } = req.body;
-  
-  let isThere =  await Matchs.find({_id:matchid});
+
+  let isThere = await Matchs.find({ _id: matchid });
   if (isThere.length == 0) {
     console.log("I cant Found This Match");
     throw new BadRequestError("I cant Found This Match");
-  
-  };
+  }
 
   console.log(isThere.length);
   //Look For Valid Token
@@ -201,8 +199,8 @@ const streamevent = async (req, res, next) => {
 const resetdata = async (req, res) => {
   await Expect.deleteMany({});
   await User.deleteMany({});
-    StratBulid();
-  res.status(StatusCodes.ACCEPTED).json({mssage:"You God To GO"});
+  StratBulid();
+  res.status(StatusCodes.ACCEPTED).json({ mssage: "You God To GO" });
 };
 
 module.exports = {
