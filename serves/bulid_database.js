@@ -4,8 +4,6 @@ const axios = require("axios");
 
 //impor custom libaraies
 const MatchScahme = require("../models/matchs");
-const User = require("../models/User");
-const Expect = require("../models/expect");
 const config = require("../configure/config");
 const { MatchModel } = require("./gameweeks/handel_api");
 const { connectDB, endconections } = require("../db/connect");
@@ -43,25 +41,14 @@ const handelDB = {
     MatchScahme.deleteMany({}, function (err) {
       console.log("collection removed");
     });
-    User.deleteMany({}, function (err) {
-      console.log("collection removed");
-    });
-    Expect.deleteMany({}, function (err) {
-      console.log("collection removed");
-    });
   },
 
   insertMatch: async (matchdata) => {
     console.time("time");
     try {
-<<<<<<< HEAD
-      await connectDB("mongodb+srv://karzma:.01068944209.@cluster0.iimjq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
-     // connectDB(config.getDBString());
-=======
-       connectDB(process.env.DATABASE_URL);
-      // await connectDB(config.getDBString());
+      // connectDB(process.env.DATABASE_URL);
+       await connectDB(config.getDBString());
 
->>>>>>> develop
       handelDB.resetDataBase();
 
       MatchScahme.create(matchdata).then((docs) => {
@@ -73,9 +60,7 @@ const handelDB = {
         //   process.exit(0);
         // });
       });
-    } catch (error) {
-      console.log(error)
-    }
+    } catch (error) {}
   },
 };
 

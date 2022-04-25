@@ -67,6 +67,7 @@ const userController = {
   login: async (req, res, next) => {
     //Catch Email And Password
     const { email, password } = req.body;
+    console.log(req.body);
 
     if (!email | !password) {
       throw new BadRequestError("Opps We Missing Some Data");
@@ -172,37 +173,37 @@ const userController = {
       }
     });
   },
-  resetpassword:async(req , res , next)=>{
-   let{userid , newpassword} = req.body;
-  console.log(userid , newpassword)
-   
-   let findUser = await User.find({_id:userid});
-   if (!findUser || findUser.length == 0) {
-    throw new BadRequestError("Opps user not found ");
-  }else{
-    let salt = await bcrypt.genSalt(10);
-    newpassword = await bcrypt.hash(newpassword, salt);
+  resetpassword: async (req, res, next) => {
+    let { userid, newpassword } = req.body;
+    console.log(userid, newpassword);
+    let findUser = await User.find({ _id: userid });
+    if (!findUser || findUser.length == 0) {
+      throw new BadRequestError("Opps user not found ");
+    } else {
+      let salt = await bcrypt.genSalt(10);
+      newpassword = await bcrypt.hash(newpassword, salt);
 
-    let updatepassword = await User.findByIdAndUpdate({_id:userid} , {password:newpassword});
-    if (!updatepassword || updatepassword.length == 0) throw new BadRequestError("something went wrong with update password");
+      let updatepassword = await User.findByIdAndUpdate(
+        { _id: userid },
+        { password: newpassword }
+      );
+      if (!updatepassword || updatepassword.length == 0)
+        throw new BadRequestError("something went wrong with update password");
 
-    res.status(StatusCodes.ACCEPTED).json({
-      massage: "user password had be update",
-      data: {
-        userid: updatepassword,
-      },
-    });
-
-  }
-  
-
-  }
+      res.status(StatusCodes.ACCEPTED).json({
+        massage: "user password had be update",
+        data: {
+          userid: updatepassword,
+        },
+      });
+    }
+  },
 };
 
 module.exports = {
   login: userController.login,
   register: userController.register,
   verifications: userController.verifications,
-  forgetPassword:userController.forgetPassword,
-  resetpassword:userController.resetpassword
+  forgetPassword: userController.forgetPassword,
+  resetpassword: userController.resetpassword,
 };

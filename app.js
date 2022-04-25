@@ -5,6 +5,9 @@ const express = require("express"),
 //Initializing Importint Modules
 require("dotenv").config();
 require("express-async-errors");
+var morgan = require('morgan');
+//set ejs
+app.set('view engine', 'ejs');
 
 //Import Custom Modules
 const updataAsyncData = require("./serves/updataeverything"),
@@ -18,19 +21,26 @@ const updataAsyncData = require("./serves/updataeverything"),
 
 //Careate New Express applications and Configure It
 app.use(express.json());
+app.use(express.urlencoded());
 
-app.get('/', function (req, res) {
-<<<<<<< HEAD
-  res.send('Hello World')
-})
-=======
-let api = "/api/v1/magicano";
-res.send('<h1>Magcano</h1><a href="/api/v1/magicano">Documentation</a>');});
->>>>>>> develop
+app.get('/', function(req, res) {
+  res.render('pages/index');
+});
+app.get('/singin', function(req, res) {
+  res.render('pages/singin');
+});
+app.get("/main" , function(req ,res){
+res.render("pages/main");
+});
+app.get("/expect" , function(req ,res){
+  res.render("pages/expect");
+  });
+  
+
 //Configure Routes
 app.use("/api/v1/magicano", event);
 app.use("/api/v1/auth", auth);
-
+morgan('tiny');
 //Config MiddleWare
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
@@ -39,15 +49,9 @@ app.use(errorHandlerMiddleware);
 
 const start = async () => {
   try {
-<<<<<<< HEAD
-    await connectDB("mongodb+srv://karzma:.01068944209.@cluster0.iimjq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
-    //await connectDB(config.getDBString());
-    updataAsyncData();
-=======
-    await connectDB(process.env.DATABASE_URL);
-    //await connectDB(config.getDBString());
-  //  updataAsyncData();
->>>>>>> develop
+    //await connectDB(process.env.DATABASE_URL);
+    await connectDB(config.getDBString());
+   // updataAsyncData();
     app.listen(config.PORT, () =>
       console.log(config.getSereverUrl(), "API Listen", config.getMagicanoUrl())
     );
