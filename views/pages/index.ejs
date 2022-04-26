@@ -144,15 +144,20 @@ max-width: 480px;
  </div>
       
   </div>
-  <button  type="submit">Sign Up</button>
+  <button  type="submit">LogIN</button>
 
 </form>
+<div> <span>If You Are New User You Can <a href="/singin" >Sign Up</a>
+   </span></div>
+   <div>Or</div>
+   <div> <span>Forget Your Password <a href="/checkemail" >Git It Back</a>
+   </span></div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script>
  
   (function(){
-
+  sessionStorage.setItem("pageUrl" , window.location.href);
     $("#formid").submit(function(e) {
 
 e.preventDefault(); // avoid to execute the actual submit of the form.

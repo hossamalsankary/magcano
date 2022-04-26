@@ -7,6 +7,8 @@ const StratBulid = require("../serves/bulid_database");
 const Matchs = require("../models/matchs");
 const User = require("../models/User");
 const Expect = require("../models/expect");
+const verifi = require("../models/optVerifications");
+
 const { json } = require("express");
 const { HandelRspondes } = require("./succeed/succeed_res");
 const {
@@ -25,7 +27,7 @@ const event = async (req, res, next) => {
     );
     const { gameweek } = currentmatch;
     if (!currentmatch) throw new BadRequestError("Opps We Missing Some Data");
-    let cuurrentgameweek = await Matchs.find({ gameweek: gameweek });
+    let cuurrentgameweek = await Matchs.find({ gameweek: gameweek }).sort({kickoff_time: -1});
 
     res.json(cuurrentgameweek);
   } catch (err) {
@@ -199,6 +201,7 @@ const streamevent = async (req, res, next) => {
 const resetdata = async (req, res) => {
   await Expect.deleteMany({});
   await User.deleteMany({});
+  await verifi.deleteMany({});
   StratBulid();
   res.status(StatusCodes.ACCEPTED).json({ mssage: "You God To GO" });
 };

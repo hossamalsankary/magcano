@@ -1,11 +1,11 @@
 //Import Libraries
-const jwd = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 //Import Custom Librares
 const userSchema = require("../models/User");
 const Verifications = require("../models/optVerifications");
-
+const config = require("../configure/config");
 const { StatusCodes } = require("http-status-codes");
 const {
   SucceedRegister,
@@ -51,9 +51,10 @@ const userController = {
       Verifications.create({
         userid: user._id,
         opt: code,
-      }).then((result) => {
+      }).then(async (result) => {
         if (!result) {
-          throw new BadRequestError("Opps Some Thing went wrong");
+          await User.remove({ id_: user.user._id });
+          throw new BadRequestError("I cant handel opt sender ");
         } else {
           opt(code, user.email);
           res.status(StatusCodes.CREATED).json(created.succeedCrateUser);
@@ -70,13 +71,13 @@ const userController = {
     console.log(req.body);
 
     if (!email | !password) {
-      throw new BadRequestError("Opps We Missing Some Data");
+      throw BadRequestError("Opps We Missing Some Data ");
     }
 
     try {
       //Looking For a User
       let user = await userSchema.findOne({ email });
-      if (!user) throw new UnauthenticatedError("User Not Found");
+      if (!user) throw new UnauthenticatedError("Plase Provied User Email");
 
       var istrue = await user.compare(password);
 
@@ -90,24 +91,43 @@ const userController = {
         });
         res.status(StatusCodes.CREATED).json(login.succeedLogin);
       } else {
-        throw new UnauthenticatedError("Some Thing Went Wrong");
+        throw new UnauthenticatedError("Password Not True");
       }
     } catch (error) {
       next(error);
     }
   },
   verifications: async (req, res, next) => {
-    const { userid, verifiycode } = req.body;
-    if (!userid || !verifiycode) {
-      throw new BadRequestError("Opps Some Thing went wrong");
+    let user;
+    let tokenforresetpassword;
+    const { userid ,verifiycode } = req.body;
+    if (!verifiycode) {
+      throw new BadRequestError("Plase Provied VerifiyCode From Your Email!");
     }
+
+if(userid){
+  user = userid;
+  tokenforresetpassword= 
+    jwt.sign({ userId: this._id }, config.JWT_SECRET, {
+      expiresIn: "30d",
+    });
+ 
+}else{
+  var token = req.headers.authorization;
+    token = String(token).slice(7);
+
+    console.log(token, req.body);
+    var decoded = jwt.verify(token, config.JWT_SECRET);
+    user = decoded.userId;
+}
+   
     //check if user is exisit
 
-    let verifiy = await Verifications.find({ userid: userid });
-    console.log(verifiy.length);
+    let verifiy = await Verifications.find({ userid: user });
+    console.log("==============>", verifiycode);
 
     if (!verifiy || verifiy.length == 0) {
-      throw new BadRequestError("User Not Found");
+      throw new BadRequestError("plase sigin up first");
     } else {
       verifiy = verifiy[0];
       if (Number(verifiy.opt) === Number(verifiycode)) {
@@ -115,27 +135,29 @@ const userController = {
           _id: verifiy._id,
         });
         let updateUser = await User.findByIdAndUpdate(
-          { _id: userid },
+          { _id: user},
           {
             optVerifications: true,
           }
         );
         if ((!optVerifications, !updateUser)) {
-          throw new BadRequestError("Opps Some Thing went wrong");
+          throw new BadRequestError(
+            "optVerifications not true plase check your code"
+          );
         }
 
         res
           .status(StatusCodes.ACCEPTED)
-          .json({ massage: "verifications succeed" });
+          .json({ massage: "verifications succeed" , data:{
+            token:tokenforresetpassword
+          } });
       } else {
         throw new BadRequestError("Opps Some Thing went wrong");
       }
     }
   },
   forgetPassword: async (req, res, next) => {
-    //first lokking for email
-    // send code to user
-    // create a reset password route
+
     const { email } = req.body;
     if (!email) {
       throw new BadRequestError("Opps Plase Provied Your Email");
@@ -144,7 +166,7 @@ const userController = {
     //find user
     let user = await User.findOne({ email: email });
     if (!user || user.length == 0) {
-      throw new BadRequestError("Opps Plase Provied Your Email");
+      throw new BadRequestError("I can`t firn this user!");
     }
 
     //saving and sending a verification code
@@ -157,7 +179,9 @@ const userController = {
       opt: code,
     }).then((result) => {
       if (!result) {
-        throw new BadRequestError("Opps Some Thing went wrong");
+        throw new BadRequestError(
+          "Opps Some Thing went wrong with Verifications"
+        );
       } else {
         try {
           opt(code, user.email);
@@ -165,6 +189,7 @@ const userController = {
             massage: "verifications succeed",
             data: {
               userid: user.id,
+           
             },
           });
         } catch (error) {
@@ -173,19 +198,35 @@ const userController = {
       }
     });
   },
+  resendverfiycode:(req , res)=>{
+    try {
+      const{email} = req;
+      // create OTP code
+      let code = Math.floor(Math.random() * 99999);
+
+      opt(code, email);
+      res.status(StatusCodes.OK).json({massage:"done"});
+    } catch (error) {
+      next(error);
+    }
+  },
   resetpassword: async (req, res, next) => {
-    let { userid, newpassword } = req.body;
-    console.log(userid, newpassword);
-    let findUser = await User.find({ _id: userid });
+    let { password } = req.body;
+    var token = req.headers.authorization;
+    token = String(token).slice(7);
+
+    var decoded = jwt.verify(token, config.JWT_SECRET);
+      console.log(decoded);
+    let findUser = await User.find({ _id: decoded.userId });
     if (!findUser || findUser.length == 0) {
       throw new BadRequestError("Opps user not found ");
     } else {
       let salt = await bcrypt.genSalt(10);
-      newpassword = await bcrypt.hash(newpassword, salt);
+      password = await bcrypt.hash(password, salt);
 
       let updatepassword = await User.findByIdAndUpdate(
-        { _id: userid },
-        { password: newpassword }
+        { _id: decoded.userId },
+        { password: password }
       );
       if (!updatepassword || updatepassword.length == 0)
         throw new BadRequestError("something went wrong with update password");
@@ -206,4 +247,5 @@ module.exports = {
   verifications: userController.verifications,
   forgetPassword: userController.forgetPassword,
   resetpassword: userController.resetpassword,
+  resendverfiycode:userController.resendverfiycode
 };
