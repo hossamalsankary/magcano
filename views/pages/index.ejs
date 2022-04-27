@@ -144,15 +144,20 @@ max-width: 480px;
  </div>
       
   </div>
-  <button  type="submit">Sign Up</button>
+  <button  type="submit">LogIN</button>
 
 </form>
+<div> <span>If You Are New User You Can <a href="/singin" >Sign Up</a>
+   </span></div>
+   <div>Or</div>
+   <div> <span>Forget Your Password <a href="/checkemail" >Git It Back</a>
+   </span></div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script>
  
   (function(){
-
+  sessionStorage.setItem("pageUrl" , window.location.href);
     $("#formid").submit(function(e) {
 
 e.preventDefault(); // avoid to execute the actual submit of the form.
@@ -166,8 +171,43 @@ $.ajax({
     data: form.serialize(), // serializes the form's elements.
     success: function(data)
     {
+
       sessionStorage.setItem("token" , data.token);
-      window.location.href = `/main`;// show response from the php script.
+    //check if the email is verifiy
+     let verifiy =  data.Userdata.optVerifications;
+     console.log(verifiy)
+     if(!verifiy){
+      $("#error").empty()
+      $("#error").append(`<div class="alert alert-warning" role="alert">
+        ${"you need to verifiy your email !"} <div/>`);
+      
+      $.ajax({
+        type:'Post',
+        url:'/api/v1/auth/resendverfiycode',
+        data:{
+          email:data.Userdata.email,
+          token:sessionStorage.getItem('token')
+        },
+        success:(data)=>{
+          console.log(data);
+          try {
+            window.location.href =`verifiy`  ;   
+
+            
+          } catch (error) {
+            console.log(error);
+          }
+        }})
+     }else{
+      sessionStorage.setItem("token" , data.token);
+
+
+      window.location.href = `/`;
+     }
+
+
+
+     
     },
     error:function(err){
       $("#error").empty()

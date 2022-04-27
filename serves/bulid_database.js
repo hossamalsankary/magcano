@@ -46,19 +46,14 @@ const handelDB = {
   insertMatch: async (matchdata) => {
     console.time("time");
     try {
-      // connectDB(process.env.DATABASE_URL);
-       await connectDB(config.getDBString());
+    connectDB(process.env.DATABASE_URL);
+    //   await connectDB(config.getDBString());
 
       handelDB.resetDataBase();
 
       MatchScahme.create(matchdata).then((docs) => {
         console.log("Done Save");
-        // endconections().then(() => {
-        //   console.log("disconnected");
-        //   console.timeEnd("time");
-
-        //   process.exit(0);
-        // });
+     
       });
     } catch (error) {}
   },

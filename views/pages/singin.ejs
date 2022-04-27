@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
     <style>
-        *,
+ 
+ *,
 *:before,
 *:after {
   -moz-box-sizing: border-box;
@@ -118,6 +119,15 @@ label.light {
     max-width: 480px;
   }
 }
+#error{
+  /*! background-color: gray padding: 10px,; */
+ 
+    
+  /*! background-color: gray; */
+  opacity: 0.4;
+  padding: 10px;
+  color: red;
+}  
     </style>
 <head>
     <meta charset="UTF-8">
@@ -133,13 +143,13 @@ label.light {
         <fieldset>
           <legend><span class="number">1</span> Your basic info</legend>
           <label for="name">Name:</label>
-          <input type="text" id="name" name="user_name">
+          <input  name="name"type="text" id="name" name="user_name">
       
           <label for="mail">Email:</label>
-          <input type="email" id="mail" name="user_email">
+          <input  name = "email" type="email" id="mail" name="user_email">
       
           <label for="password">Password:</label>
-          <input type="password" id="password" name="user_password">
+          <input name = "password" type="password" id="password" name="user_password">
       
        
           <div id="error" class="alert alert-warning" role="alert">
@@ -159,15 +169,16 @@ label.light {
     e.preventDefault(); // avoid to execute the actual submit of the form.
 
     var form = $(this);
-    var actionUrl = "/api/v1/auth/login" ;
+    var actionUrl = "/api/v1/auth/register" ;
     console.log(form.serialize());
     $.ajax({
     type: "POST",
     url: actionUrl,
     data: form.serialize(), // serializes the form's elements.
     success: function(data)
-    {
-    console.log(data); // show response from the php script.
+    {sessionStorage.setItem("token" , data.token);
+      window.location.href = `/verifiy`;// show response from the php script.
+ // show response from the php script.
     },
     error:function(err){
     $("#error").empty()
