@@ -1,4 +1,3 @@
-
 //Import Libararies
 const axios = require("axios");
 
@@ -46,8 +45,8 @@ const handelDB = {
   insertMatch: async (matchdata) => {
     console.time("time");
     try {
-    connectDB(process.env.DATABASE_URL);
-    //   await connectDB(config.getDBString());
+   connectDB(process.env.DATABASE_URL);
+    // await connectDB(config.getDBString());
 
       handelDB.resetDataBase();
 
@@ -84,3 +83,4 @@ requestOb.getGameWeeksID().then(async (eventReqData) => {
 });
 };
 module.exports = start;
+

@@ -1,6 +1,7 @@
 //lets see what oop can do
 //define gameweeks class
-const converttimeid = require("../helper/teamid")
+const getFlagUrl = require("../flag");
+const converttimeid = require("../helper/teamid");
 class MatchModel {
   constructor({
     finished,
@@ -23,6 +24,9 @@ class MatchModel {
   }
 
    get toMap() {
+     let team_a = converttimeid(this.team_a);
+     let team_h = converttimeid(this.team_h);
+     console.log(team_a);
  return   {
   started:this.started,
       finished: this.finished,
@@ -30,8 +34,10 @@ class MatchModel {
        gameweek: this.event,
        expectations:{},
       name_and_result: {
-        team_a: converttimeid(this.team_a),
-        team_h:converttimeid (this.team_h),
+        team_a: team_a,
+        team_h:team_h,
+        team_a_url:getFlagUrl(team_a),
+        team_h_url:getFlagUrl(team_h),
         team_a_score: this.team_a_score,
         team_h_score: this.team_h_score,
       },

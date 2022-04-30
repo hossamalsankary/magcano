@@ -35,7 +35,7 @@ const HandelApiControler = {
       const { gameweek } = currentmatch;
       if (!currentmatch) throw new BadRequestError("Opps We Missing Some Data");
       let cuurrentgameweek = await Matchs.find({ gameweek: gameweek }).sort({
-        kickoff_time: -1,
+        kickoff_time: 1,
       });
 
       res.json(cuurrentgameweek);

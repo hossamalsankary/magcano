@@ -8,7 +8,7 @@ router.route("/login").post(login);
 
 //verifications
 router.route("/verifications").post(verifications);
-router.route("/forgetpassword").post(forgetPassword);
+router.route("/forgetPassword").post(forgetPassword);
 router.route("/resetpassword").post(resetpassword);
 router.route("/resendverfiycode").post(resendverfiycode);
 

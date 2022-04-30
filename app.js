@@ -1,7 +1,7 @@
 // Import Libraries
 const express = require("express"),
-  app = express();
-
+app = express();
+const path = require('path');
 //Initializing Importint Modules
 require("dotenv").config();
 require("express-async-errors");
@@ -22,6 +22,7 @@ const updataAsyncData = require("./serves/updataeverything"),
 //Careate New Express applications and Configure It
 app.use(express.json());
 app.use(express.urlencoded());
+app.use( express.static(path.join( __dirname, 'flags')));
 
 //Route For UI
 // Those Route Just for Testing My API
@@ -51,6 +52,7 @@ app.get("/resetpassword", function (req, res) {
 });
 
 //Configure Routes
+
 app.use("/api/v1/magicano", event);
 app.use("/api/v1/auth", auth);
 morgan("tiny");
@@ -62,11 +64,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const start = async () => {
   try {
-    await connectDB(process.env.DATABASE_URL);
-    //await connectDB(config.getDBString());
-    // updataAsyncData();
+        await connectDB(process.env.DATABASE_URL);
+      // await connectDB(config.getDBString());
+     updataAsyncData();
     app.listen(config.PORT, () =>
-      console.log(config.getSereverUrl(), "API Listen", config.getMagicanoUrl())
+      console.log()
     );
   } catch (error) {
     console.log(error);
@@ -74,3 +76,4 @@ const start = async () => {
 };
 //start myapp
 start();
+module.exports = app;

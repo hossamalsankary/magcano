@@ -167,8 +167,8 @@ background-color: var(--color-bg-primary);
 box-shadow: 0 4px 4px 0 rgba(48, 48, 48, 0.15), 0 0 0 15px var(--color-bg-secondary);
 }
 .team-logo img {
-width: 50px;
-}
+    width: 74px;
+height: 70px;}
 .team-name {
 text-align: center;
 margin-top: 24px;
@@ -343,6 +343,10 @@ margin: 7%;
          let team_h = matchdata.name_and_result.team_h;
          let team_a_score= matchdata.name_and_result.team_a_score;
          let team_h_score= matchdata.name_and_result.team_h_score;
+         let url_a= matchdata.name_and_result.team_a_url;
+         let url_h= matchdata.name_and_result.team_h_url;
+         
+
          let handeldate = {
             year:kickoff_time.getFullYear(),
 
@@ -401,7 +405,7 @@ margin: 7%;
                     <div class="column">
                         <div class="team team--home">
                             <div class="team-logo">
-                                <img src="https://assets.codepen.io/285131/whufc.svg" />
+                                <img src="${url_a.slice(32)}"" />
                             </div>
                             <h2 class="team-name">${team_a}</h2>
                         </div>
@@ -436,7 +440,7 @@ margin: 7%;
                     <div class="column">
                         <div class="team team--away">
                             <div class="team-logo">
-                                <img src="https://assets.codepen.io/285131/chelsea.svg" />
+                                <img src="${url_h.slice(32)}" />
                             </div>
                             <h2 class="team-name">${team_h}</h2>
                         </div>

@@ -39,7 +39,8 @@ const userController = {
         data: user,
       });
       // create OTP code
-      let code = Math.floor(Math.random() * 99999);
+      //let code = Math.floor(Math.random() * 99999);
+      let code = 12345;
 
       //save opt
       Verifications.create({
@@ -62,7 +63,6 @@ const userController = {
   login: async (req, res, next) => {
     //Catch Email And Password
     const { email, password } = req.body;
-    console.log(req.body);
 
     if (!email | !password) {
       throw BadRequestError("Opps We Missing Some Data ");
@@ -101,7 +101,6 @@ const userController = {
       var token = req.headers.authorization;
       token = String(token).slice(7);
 
-      console.log(token, req.body);
       var decoded = jwt.verify(token, config.JWT_SECRET);
       user = decoded.userId;
 
@@ -111,30 +110,34 @@ const userController = {
       if (!verifiy || verifiy.length == 0) {
         throw new BadRequestError("plase sigin up first");
       } else {
+      
         verifiy = verifiy[0];
         if (Number(verifiy.opt) === Number(verifiycode)) {
-          //remove opt
-          let optVerifications = await Verifications.findByIdAndRemove({
-            _id: verifiy._id,
-          });
-
-          //update User optVerifications
-          let updateUser = await User.findByIdAndUpdate(
-            { _id: user },
-            {
-              optVerifications: true,
-            }
-          );
-          if ((!optVerifications, !updateUser)) {
-            throw new BadRequestError(
-              "optVerifications not true plase check your code"
-            );
-          }
-
-          res.status(StatusCodes.ACCEPTED).json({
-            massage: "verifications succeed",
-            resetpassword,
-          });
+         
+                //remove opt
+                let optVerifications = await Verifications.findByIdAndRemove({
+                  _id: verifiy._id,
+                });
+      
+                //update User optVerifications
+                let updateUser = await User.findByIdAndUpdate(
+                  { _id: user },
+                  {
+                    optVerifications: true,
+                  }
+                );
+                if ((!optVerifications, !updateUser)) {
+                  throw new BadRequestError(
+                    "optVerifications not true plase check your code"
+                  );
+                }
+      
+                res.status(StatusCodes.ACCEPTED).json({
+                  massage: "verifications succeed",
+                  resetpassword,
+                });
+            
+          
         } else {
           throw new BadRequestError("Opps Some Thing went wrong");
         }
@@ -158,8 +161,8 @@ const userController = {
 
     //saving and sending a verification code
     // create OTP code
-    let code = Math.floor(Math.random() * 99999);
-
+    //let code = Math.floor(Math.random() * 99999);
+let code = 12345;
     //save opt
     Verifications.create({
       userid: user._id,
@@ -188,14 +191,14 @@ const userController = {
   resendverfiycode: async (req, res, next) => {
     try {
       const { email } = req.body;
-      console.log(req.body);
       if (!email)
         throw new BadRequestError(
           "Opps Some Thing went wrong with Verifications"
         );
 
       // create OTP code
-      let code = Math.floor(Math.random() * 99999);
+     // let code = Math.floor(Math.random() * 99999);
+     let code = 12345;
       opt(code, email);
 
       let user = await User.find({ email: email });
@@ -206,7 +209,7 @@ const userController = {
       user = user[0];
       Verifications.findOneAndRemove({
         userid: user._id,
-      }).then((data) => console.log(data));
+      })
 
       let create = await Verifications.create({
         userid: user._id,
@@ -237,7 +240,7 @@ const userController = {
     token = String(token).slice(7);
 
     var decoded = jwt.verify(token, config.JWT_SECRET);
-    console.log(decoded);
+   
     let findUser = await User.find({ _id: decoded.userId });
     if (!findUser || findUser.length == 0) {
       throw new BadRequestError("Opps user not found ");
