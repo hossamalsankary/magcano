@@ -38,7 +38,7 @@ const HandelApiControler = {
         kickoff_time: 1,
       });
 
-      res.json(cuurrentgameweek);
+      res.status(StatusCodes.ACCEPTED).json(cuurrentgameweek);
     } catch (err) {
       next(err);
     }
@@ -64,7 +64,6 @@ const HandelApiControler = {
               Matchs.find({ _id: matchid }, { subscribers: 0 }).then(
                 (match) => {
                   if (!match) throw new BadRequestError("Opps Token Not Found");
-                  console.log(match);
 
                   resolve(match);
                 }
@@ -79,7 +78,6 @@ const HandelApiControler = {
           let userMatchesdata = data;
           let result = [];
           // userMatchesdata.push(userEx);
-          // console.log(userMatchesdata);
           let handeldata = [];
 
           for (let index = 0; index < userMatchesdata.length; index++) {
@@ -87,7 +85,7 @@ const HandelApiControler = {
             machitem.expectations.push(userEx[index]);
             handeldata.push(machitem);
           }
-          res.json(handeldata);
+          res.status(StatusCodes.OK).json(handeldata);
         });
       });
     } catch (err) {
@@ -100,8 +98,7 @@ const HandelApiControler = {
 
     let isThere = await Matchs.find({ _id: matchid });
     if (isThere.length == 0) {
-      console.log("I cant Found This Match");
-      throw new BadRequestError("I cant Found This Match");
+      throw new BadRequestError(`I cant Found This Match $`);
     }
 
     console.log(isThere.length);
@@ -134,7 +131,6 @@ const HandelApiControler = {
       if (isUniq) {
         Expect.create(insertExpections)
           .then(async (expect) => {
-            console.log(expect);
             // After Done Inserted Make A relations To user
             let userData = await User.findOneAndUpdate(
               { _id: userId },
@@ -162,7 +158,6 @@ const HandelApiControler = {
             );
             if (!matchData) throw new BadRequestError("we Got Some Problems");
 
-            console.log(matchData);
             await Expect.findOneAndUpdate(
               { matchid: matchData._id },
               { finished: matchData.finished }
@@ -174,7 +169,7 @@ const HandelApiControler = {
         let status = new HandelRspondes({
           massage: "Succeded Creater New Expetions",
         });
-        res.json(status.succedCreateExpections);
+        res.status(StatusCodes.CREATED).json(status.succedCreateExpections);
       } else {
         // There We Going To Updata The Expections
 
@@ -195,13 +190,11 @@ const HandelApiControler = {
         $and: [{ starteds: true }, { finished: false }],
       });
       if (data.length === 0) {
-        console.log("we have no match playing right now");
         data = await Matchs.findOne({ finished: false });
         let now = new Date().valueOf();
         let matchdata = new Date(data.kickoff_time).valueOf();
         let dayLeft = (matchdata - now) / 1000 / 60 / 60 / 24;
 
-        console.log(Math.floor(dayLeft));
       }
 
       res.json({ data });

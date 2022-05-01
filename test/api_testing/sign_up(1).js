@@ -11,7 +11,7 @@ let expect = chai.expect;
 chai.use(chaiHttp);
 
 describe("test Auth ", function () {
-    let token  = ""
+    let token  = "";
   before(async () => {
      // console.log(process.env.DATABASE_URL)
       await connectDB(process.env.DATABASE_URL);;
@@ -50,6 +50,7 @@ describe("test Auth ", function () {
       .then(function (res) {
 //console.log(res.body.token);
         token = res.body.token;
+        process.env.TOKEN = token;
         expect(res.body).to.haveOwnProperty("massage");
         expect(res).to.have.status(201);
         done();
@@ -99,6 +100,7 @@ describe("test Auth ", function () {
       });
   });
   it("ResetPassword", function (done) {
+  
     chai
       .request(app)
       .post("/api/v1/auth/resetpassword ")
