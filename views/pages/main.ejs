@@ -405,7 +405,7 @@ margin: 7%;
                     <div class="column">
                         <div class="team team--home">
                             <div class="team-logo">
-                                <img src="${url_a.slice(32)}"" />
+                                <img src="${url_a.slice(url_a.search("/"))}"" />
                             </div>
                             <h2 class="team-name">${team_a}</h2>
                         </div>
@@ -440,7 +440,7 @@ margin: 7%;
                     <div class="column">
                         <div class="team team--away">
                             <div class="team-logo">
-                                <img src="${url_h.slice(32)}" />
+                                <img src="${url_h.slice(url_h.search("/"))}" />
                             </div>
                             <h2 class="team-name">${team_h}</h2>
                         </div>

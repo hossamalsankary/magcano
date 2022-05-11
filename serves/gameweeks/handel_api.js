@@ -42,9 +42,9 @@ class MatchModel {
         team_h_score: this.team_h_score,
       },
 
-    } 
+    }; 
   }
-};
+}
 module.exports = {
   MatchModel,
 };
