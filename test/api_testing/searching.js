@@ -33,7 +33,7 @@ describe("Testing Search in ALL Game Weeks", function () {
   // First we have req type get
   chai
     .request(app)
-    .get("/api/v1/magicano/searching?gameweek=1")
+    .get("/api/v1/magicano/searching?gameweek=1&team=Arsenal")
     .set("authorization", `Bearer ${token}`)
     .then((respond) => {
 
