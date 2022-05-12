@@ -1,1 +1,1 @@
-GET http://127.0.0.1:3000/api/v1/magicano/searching?&sort=kickoff_time,-1
+GET http://127.0.0.1:3000/api/v1/magicano/searching?&sort=kickoff_time,&limit=10&gameweek=38&team=Arsenal

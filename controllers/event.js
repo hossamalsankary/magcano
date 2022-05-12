@@ -30,13 +30,16 @@ const HandelApiControler = {
       jwt.verify(token, config.JWT_SECRET);
 
       let currentmatch = await Matchs.findOne(
-        { finished: false },
+        {            started: false,
+      },
         { gameweek: 1, _id: 0 }
       );
+      console.log(currentmatch);
       const { gameweek } = currentmatch;
+      
       if (!currentmatch) throw new BadRequestError("Opps We Missing Some Data");
       let cuurrentgameweek = await Matchs.find({ gameweek: gameweek }).sort({
-        kickoff_time: 1,
+        kickoff_time: -1,
       });
 
       // console.log(cuurrentgameweek);
@@ -187,122 +190,54 @@ const HandelApiControler = {
     }
   },
 
-  /**
-   * const getAllProducts = async (req, res) => {
-  const { featured, company, name, sort, fields, numericFilters } = req.query;
-  const queryObject = {};
-
-  if (featured) {
-    queryObject.featured = featured === 'true' ? true : false;
-  }
-  if (company) {
-    queryObject.company = company;
-  }
-  if (name) {
-    queryObject.name = { $regex: name, $options: 'i' };
-  }
-  if (numericFilters) {
-    const operatorMap = {
-      '>': '$gt',
-      '>=': '$gte',
-      '=': '$eq',
-      '<': '$lt',
-      '<=': '$lte',
-    };
-    const regEx = /\b(<|>|>=|=|<|<=)\b/g;
-    let filters = numericFilters.replace(
-      regEx,
-      (match) => `-${operatorMap[match]}-`
-    );
-    const options = ['price', 'rating'];
-    filters = filters.split(',').forEach((item) => {
-      const [field, operator, value] = item.split('-');
-      if (options.includes(field)) {
-        queryObject[field] = { [operator]: Number(value) };
-      }
-    });
-  }
-
-  let result = Product.find(queryObject);
-  // sort
-  if (sort) {
-    const sortList = sort.split(',').join(' ');
-    result = result.sort(sortList);
-  } else {
-    result = result.sort('createdAt');
-  }
-
-  if (fields) {
-    const fieldsList = fields.split(',').join(' ');
-    result = result.select(fieldsList);
-  }
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-
-  result = result.skip(skip).limit(limit);
-  // 23
-  // 4 7 7 7 2
-
-  const products = await result;
-  res.status(200).json({ products, nbHits: products.length });
-};
-   */
   searching: async (req, res, next) => {
     try {
       let result;
       let query = {};
-// looking for query
+      // looking for query
       if (!req.query) {
         result = await Matchs.find(query);
 
-        res.status(StatusCodes.OK).json({result});
+        res.status(StatusCodes.OK).json({ result });
       } else {
-      // extract the search item  
-        const { game, sort , limit ,team } = req.query;
+        // extract the search item
+        const { gameweek, sort, limit, team } = req.query;
 
-        if(team){
-         
+        if (team) {
           // query['name_and_result.team_a'] = team;
-           query['$or'] = [
-            {'name_and_result.team_a':team },
-            { 'name_and_result.team_h':team}
+          query["$or"] = [
+            { "name_and_result.team_a": team },
+            { "name_and_result.team_h": team },
           ];
-
-
-     //result  = Matchs.find({});
         }
-        
-        if (game) {
-          query.gameweek = game;
+
+        if (gameweek) {
+          query.gameweek = gameweek;
           console.log(query);
         }
         result = Matchs.find(query);
-        
+
         if (sort) {
-          const sortList = sort.split(',').join(",")
+          const sortList = sort.split(",");
 
-         // state = Number(state);
+          // state = Number(state);
+          let sortobject = {};
 
-
-          console.log( typeof sortList);
-          result = result.sort(sortList);
+          if (Number(sortList[1])) {
+            sortobject[sortList[0]] = Number(sortList[1]);
+            console.log(sortobject);
+            result = result.sort(sortobject);
+          }
         }
-        if(limit ){
-          if(Number(limit)){
+        if (limit) {
+          if (Number(limit)) {
             result = result.limit(Number(limit));
           }
-
-          
-
-           
         }
-
-      
 
         result = await result;
 
-        res.status(StatusCodes.OK).json({  len:result.length , result:result  });
+        res.status(StatusCodes.OK).json({ len: result.length, result: result });
       }
     } catch (err) {
       next(err);
