@@ -4,7 +4,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
   if (err instanceof CustomAPIError) {
     console.log(err);
 
-    res.status(err.statusCode).json({ massage: err.message });
+    res.status(err.statusCode).json({ status:false  , code:err.statusCode, massage: err.message });
   } else {
     console.log(err.stack);
     res
