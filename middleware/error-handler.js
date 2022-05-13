@@ -9,7 +9,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     console.log(err.stack);
     res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ massage: "Opps Some Thing Went Wrong ..." });
+      .json({ massage: "Opes Some Thing Went Wrong ..." });
   }
 };
 

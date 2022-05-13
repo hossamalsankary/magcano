@@ -20,24 +20,33 @@ const {
 } = require("../errors/index");
 const opt = require("./opt-sender/opt-verifications-for-gmail");
 const User = require("../models/User");
+const responding = require("./res_handler/responding");
 
 //define User Controller
 const userController = {
-  //Carete A user
+  //Cerate A user
   register: async (req, res, next) => {
     try {
+      const{email , password , name} = req.body;
+      console.log(email == undefined,password,name)
+      if(email == undefined || password == undefined || name == undefined ){
+         throw new BadRequestError("Sorry We Messing Some Data");
+        }else{
+
+          try {
+            const user = await userSchema.create({ ...req.body });
+            
+          } catch (error) {
+            throw new BadRequestError("Please Provide Uniq Email");
+
+          }
+        
+      }
       //Create new user with a uniq email
-      const user = await userSchema.create({ ...req.body });
 
       //create jwt
       let token = user.createJWT();
 
-      //   Send Back The Respond
-      let created = new SucceedRegister({
-        massage: "Plase Check Your Email acount to verifiy your Email",
-        token: token,
-        data: user,
-      });
       // create OTP code
       //let code = Math.floor(Math.random() * 99999);
       let code = 12345;
@@ -50,9 +59,18 @@ const userController = {
         if (!result) {
           await User.remove({ id_: user.user._id });
           throw new BadRequestError("I cant handel opt sender ");
+
         } else {
+          //Send Massage
           opt(code, user.email);
-          res.status(StatusCodes.CREATED).json(created.succeedCrateUser);
+
+          //Make the Responding
+          let useResponding = responding.succeedRes({
+            message:"Succeed Create User Please Check Your Email For Verify Code",
+            data: user,
+            token: token,
+          });
+          res.status(useResponding.code).json(useResponding);
         }
       });
     } catch (error) {
@@ -65,26 +83,34 @@ const userController = {
     const { email, password } = req.body;
 
     if (!email | !password) {
-      throw BadRequestError("Opps We Missing Some Data ");
+      throw BadRequestError(
+        "Oops We Missing Some Data Check Your Emile or Password"
+      );
     }
     try {
       //Looking For a User
       let user = await userSchema.findOne({ email });
-      if (!user) throw new UnauthenticatedError("Plase Provied User Email");
+      if (!user) throw new UnauthenticatedError("Sorry We can`t recognizing Your Email");
 
       var istrue = await user.compare(password);
 
       if (istrue) {
         //Create New Token
         let token = user.createJWT();
-        const login = new SucceedRegister({
-          massage: "Login succeeded",
+
+        user.password = null;
+
+        let loginRes = responding.succeedRes({
+          message:"Succeed Login ",
+          statusCode:StatusCodes.ACCEPTED,
           data: user,
           token: token,
         });
-        res.status(StatusCodes.CREATED).json(login.succeedLogin);
+        res.status(loginRes.code).json(loginRes);
       } else {
-        throw new UnauthenticatedError("Password Not True");
+        throw new UnauthenticatedError(
+          "Password Not True try To Reset Your Password"
+        );
       }
     } catch (error) {
       next(error);
@@ -110,34 +136,30 @@ const userController = {
       if (!verifiy || verifiy.length == 0) {
         throw new BadRequestError("plase sigin up first");
       } else {
-      
         verifiy = verifiy[0];
         if (Number(verifiy.opt) === Number(verifiycode)) {
-         
-                //remove opt
-                let optVerifications = await Verifications.findByIdAndRemove({
-                  _id: verifiy._id,
-                });
-      
-                //update User optVerifications
-                let updateUser = await User.findByIdAndUpdate(
-                  { _id: user },
-                  {
-                    optVerifications: true,
-                  }
-                );
-                if ((!optVerifications, !updateUser)) {
-                  throw new BadRequestError(
-                    "optVerifications not true plase check your code"
-                  );
-                }
-      
-                res.status(StatusCodes.ACCEPTED).json({
-                  massage: "verifications succeed",
-                  resetpassword,
-                });
-            
-          
+          //remove opt
+          let optVerifications = await Verifications.findByIdAndRemove({
+            _id: verifiy._id,
+          });
+
+          //update User optVerifications
+          let updateUser = await User.findByIdAndUpdate(
+            { _id: user },
+            {
+              optVerifications: true,
+            }
+          );
+          if ((!optVerifications, !updateUser)) {
+            throw new BadRequestError(
+              "optVerifications not true plase check your code"
+            );
+          }
+
+          res.status(StatusCodes.ACCEPTED).json({
+            massage: "verifications succeed",
+            resetpassword,
+          });
         } else {
           throw new BadRequestError("Opps Some Thing went wrong");
         }
@@ -162,7 +184,7 @@ const userController = {
     //saving and sending a verification code
     // create OTP code
     //let code = Math.floor(Math.random() * 99999);
-let code = 12345;
+    let code = 12345;
     //save opt
     Verifications.create({
       userid: user._id,
@@ -187,7 +209,7 @@ let code = 12345;
       }
     });
   },
-//=============================================================-resendverfiycode-================
+  //=============================================================-resendverfiycode-================
   resendverfiycode: async (req, res, next) => {
     try {
       const { email } = req.body;
@@ -197,8 +219,7 @@ let code = 12345;
         );
 
       // create OTP code
-     // let code = Math.floor(Math.random() * 99999);
-     let code = 12345;
+      let code = 12345;
       opt(code, email);
 
       let user = await User.find({ email: email });
@@ -209,7 +230,7 @@ let code = 12345;
       user = user[0];
       Verifications.findOneAndRemove({
         userid: user._id,
-      })
+      });
 
       let create = await Verifications.create({
         userid: user._id,
@@ -233,14 +254,14 @@ let code = 12345;
       next(error);
     }
   },
-//===========================================================resetpassword==================
+  //===========================================================resetpassword==================
   resetpassword: async (req, res, next) => {
     let { password } = req.body;
     var token = req.headers.authorization;
     token = String(token).slice(7);
 
     var decoded = jwt.verify(token, config.JWT_SECRET);
-   
+
     let findUser = await User.find({ _id: decoded.userId });
     if (!findUser || findUser.length == 0) {
       throw new BadRequestError("Opps user not found ");
@@ -272,4 +293,5 @@ module.exports = {
   forgetPassword: userController.forgetPassword,
   resetpassword: userController.resetpassword,
   resendverfiycode: userController.resendverfiycode,
+  
 };
