@@ -332,6 +332,7 @@ margin: 7%;
     success: function(gameweekdata)
     
     {
+        console.log(gameweekdata);
         console.log(gameweekdata[0]);
      gameweekdata.forEach(matchdata => {
          let id  = matchdata._id;
@@ -343,8 +344,16 @@ margin: 7%;
          let team_h = matchdata.name_and_result.team_h;
          let team_a_score= matchdata.name_and_result.team_a_score;
          let team_h_score= matchdata.name_and_result.team_h_score;
-         let url_a= matchdata.name_and_result.team_a_url;
-         let url_h= matchdata.name_and_result.team_h_url;
+         let url_a;
+            let url_h;
+         if(matchdata.name_and_result.team_a_url &&  matchdata.name_and_result.team_h_url){
+
+            url_a = matchdata.name_and_result.team_a_url;
+            url_h  = matchdata.name_and_result.team_h_url;
+         }else{
+             url_a = "https://ouch-cdn2.icons8.com/V0BC7efDTAkp2JZ9DUHT5wrH5rCdoAkMGizUQs1w0lE/rs:fit:256:256/czM6Ly9pY29uczgu/b3VjaC1wcm9kLmFz/c2V0cy9zdmcvNjAx/L2JhMjNmNDlhLTZm/NjctNDI2Yi05NGQx/LWNmZjBjNmFkMTJh/OS5zdmc.png";
+             url_h = "https://ouch-cdn2.icons8.com/V0BC7efDTAkp2JZ9DUHT5wrH5rCdoAkMGizUQs1w0lE/rs:fit:256:256/czM6Ly9pY29uczgu/b3VjaC1wcm9kLmFz/c2V0cy9zdmcvNjAx/L2JhMjNmNDlhLTZm/NjctNDI2Yi05NGQx/LWNmZjBjNmFkMTJh/OS5zdmc.png";
+         }
          
 
          let handeldate = {
