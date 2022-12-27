@@ -46,10 +46,8 @@ const handelDB = {
     console.time("time");
     try {
    connectDB(process.env.DATABASE_URL);
-    // await connectDB(config.getDBString());
 
       handelDB.resetDataBase();
-
       MatchScahme.create(matchdata).then((docs) => {
         console.log("Done Save");
      

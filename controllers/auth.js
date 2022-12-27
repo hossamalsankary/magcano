@@ -20,6 +20,7 @@ const {
 } = require("../errors/index");
 const opt = require("./opt-sender/opt-verifications-for-gmail");
 const User = require("../models/User");
+const responding =  require('./res_handler/responding');
 
 //define User Controller
 const userController = {
@@ -32,12 +33,7 @@ const userController = {
       //create jwt
       let token = user.createJWT();
 
-      //   Send Back The Respond
-      let created = new SucceedRegister({
-        massage: "Plase Check Your Email acount to verifiy your Email",
-        token: token,
-        data: user,
-      });
+  ;
       // create OTP code
       //let code = Math.floor(Math.random() * 99999);
       let code = 12345;
@@ -51,8 +47,12 @@ const userController = {
           await User.remove({ id_: user.user._id });
           throw new BadRequestError("I cant handel opt sender ");
         } else {
+          //Send Massage
           opt(code, user.email);
-          res.status(StatusCodes.CREATED).json(created.succeedCrateUser);
+
+          //Make the Responding
+          let useRrespondin = responding.succeedCreate({data:user , token:token});
+          res.status(useRrespondin.code).json(useRrespondin);
         }
       });
     } catch (error) {
@@ -65,7 +65,7 @@ const userController = {
     const { email, password } = req.body;
 
     if (!email | !password) {
-      throw BadRequestError("Opps We Missing Some Data ");
+      throw BadRequestError("Opps We Missing Some Data Cheack Your Emaile or Password");
     }
     try {
       //Looking For a User
@@ -77,14 +77,14 @@ const userController = {
       if (istrue) {
         //Create New Token
         let token = user.createJWT();
-        const login = new SucceedRegister({
-          massage: "Login succeeded",
-          data: user,
-          token: token,
-        });
-        res.status(StatusCodes.CREATED).json(login.succeedLogin);
+        
+       user.password = null; 
+
+      let loginResponding = responding.succeedLogin({data:user , token:token});
+        res.status(loginResponding.code).json(loginResponding);
+
       } else {
-        throw new UnauthenticatedError("Password Not True");
+        throw new UnauthenticatedError("Password Not True try To Reset Your Pawword");
       }
     } catch (error) {
       next(error);
